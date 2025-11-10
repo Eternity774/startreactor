@@ -15,8 +15,28 @@ MonoBehaviour:
   m_GroupName: StartReactorCore
   m_GUID: 6fd1bd33861a2b84d8f6fe2945e719b0
   m_SerializeEntries:
+  - m_GUID: 09a39e7ddcd0b6d42a6550bc81de842c
+    m_Address: WinPopup
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1220d4e172b680f4d9e60746b39e7f6d
+    m_Address: LosePopup
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 14abb1ce0261d834890540fe949e1386
+    m_Address: PlayfieldButton
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5c3a6f8df5af7054d8f150019524899a
+    m_Address: Levels
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d2646aca2b22f10429212fb244b229e8
-    m_Address: Assets/StartReactor/GameConfiguration.asset
+    m_Address: CoreGameConfiguration
     m_ReadOnly: 0
     m_SerializedLabels:
     - default
