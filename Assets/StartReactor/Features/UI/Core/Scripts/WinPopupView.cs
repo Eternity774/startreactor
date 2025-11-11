@@ -19,15 +19,20 @@ namespace StartReactor.Features.UI
         {
             if (_nextButton != null)
             {
-                _nextButton.onClick.AddListener(() => OnNextClicked?.Invoke());
+                _nextButton.onClick.AddListener(HandleNextClicked);
             }
+        }
+
+        private void HandleNextClicked()
+        {
+            OnNextClicked?.Invoke();
         }
 
         private void OnDestroy()
         {
             if (_nextButton != null)
             {
-                _nextButton.onClick.RemoveAllListeners();
+                _nextButton.onClick.RemoveListener(HandleNextClicked);
             }
         }
 

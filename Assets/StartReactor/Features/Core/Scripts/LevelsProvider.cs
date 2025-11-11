@@ -8,28 +8,30 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace StartReactor.Features.Core
 {
-    /// <summary>
-    /// LevelsProvider loads all level configurations from Addressables.
-    /// Uses labels to load all levels at once.
-    /// </summary>
     public class LevelsProvider
     {
         public async UniTask<List<LevelConfiguration>> LoadAllLevelsAsync(CancellationToken cancellationToken)
         {
-            AsyncOperationHandle<IList<LevelConfiguration>> handle = Addressables.LoadAssetsAsync<LevelConfiguration>(AddressableKeys.Levels);
+            AsyncOperationHandle<LevelsConfig> handle = 
+                Addressables.LoadAssetAsync<LevelsConfig>(AddressableKeys.LevelsConfig);
             
             try
             {
                 await handle.ToUniTask(cancellationToken: cancellationToken);
                 
-                if (handle.Status == AsyncOperationStatus.Succeeded)
+                if (handle.Status == AsyncOperationStatus.Succeeded && handle.Result != null)
                 {
-                    // Return levels as loaded (no sorting needed since LevelNumber was removed)
-                    return handle.Result.ToList();
+                    LevelsConfig levelsConfig = handle.Result;
+                    
+                    List<LevelConfiguration> levels = levelsConfig.Levels
+                        .Where(level => level != null)
+                        .ToList();
+                    
+                    return levels;
                 }
                 else
                 {
-                    Debug.LogError($"Failed to load levels. Status: {handle.Status}");
+                    Debug.LogError($"Failed to load LevelsConfig. Status: {handle.Status}");
                     Addressables.Release(handle);
                     return new List<LevelConfiguration>();
                 }
@@ -39,36 +41,18 @@ namespace StartReactor.Features.Core
                 Addressables.Release(handle);
                 throw;
             }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"Error loading LevelsConfig: {ex.Message}");
+                Addressables.Release(handle);
+                return new List<LevelConfiguration>();
+            }
         }
 
-        /// <summary>
-        /// Loads a specific level by its addressable key.
-        /// </summary>
-        public async UniTask<LevelConfiguration> LoadLevelAsync(string levelKey, CancellationToken cancellationToken)
+        public async UniTask<LevelConfiguration> LoadLevelByIndexAsync(int levelIndex, CancellationToken cancellationToken)
         {
-            AsyncOperationHandle<LevelConfiguration> handle = 
-                Addressables.LoadAssetAsync<LevelConfiguration>(levelKey);
-            
-            try
-            {
-                await handle.ToUniTask(cancellationToken: cancellationToken);
-                
-                if (handle.Status == AsyncOperationStatus.Succeeded)
-                {
-                    return handle.Result;
-                }
-                else
-                {
-                    Debug.LogError($"Failed to load level: {levelKey}. Status: {handle.Status}");
-                    Addressables.Release(handle);
-                    return null;
-                }
-            }
-            catch (System.OperationCanceledException)
-            {
-                Addressables.Release(handle);
-                throw;
-            }
+            List<LevelConfiguration> levels = await LoadAllLevelsAsync(cancellationToken);
+            return levels[levelIndex];
         }
     }
 }

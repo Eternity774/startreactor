@@ -2,14 +2,9 @@ using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace StartReactor.Features.Environment
 {
-    /// <summary>
-    /// PlayfieldView manages the visual representation of the gameplay grid.
-    /// Handles only visual updates - no logic.
-    /// </summary>
     public class PlayfieldView : MonoBehaviour, IPlayfieldView
     {
         public event Action<int> OnButtonClicked;
@@ -17,30 +12,18 @@ namespace StartReactor.Features.Environment
         [SerializeField]
         private Transform _gridContainer;
 
-        private List<PlayfieldButton> _buttons = new List<PlayfieldButton>();
-        private Dictionary<int, Color> _defaultColors = new Dictionary<int, Color>();
+        private List<PlayfieldButton> _buttons = new();
 
         public Transform GridContainer => _gridContainer;
 
         public void InitializeButtons(List<PlayfieldButton> buttons)
         {
             ClearGrid();
-
             _buttons = buttons;
 
-            for (int i = 0; i < _buttons.Count; i++)
+            foreach (var button in _buttons)
             {
-                if (_buttons[i] != null)
-                {
-                    // Cache default color
-                    if (_buttons[i].Image != null)
-                    {
-                        _defaultColors[i] = _buttons[i].Image.color;
-                    }
-
-                    // Subscribe to click events
-                    _buttons[i].OnClicked += HandleButtonClicked;
-                }
+                button.OnClicked += HandleButtonClicked;
             }
         }
 
@@ -49,95 +32,40 @@ namespace StartReactor.Features.Environment
             OnButtonClicked?.Invoke(button.ButtonIndex);
         }
 
-        public void SetButtonHighlight(int buttonIndex, bool highlight, float intensity)
-        {
-            if (buttonIndex < 0 || buttonIndex >= _buttons.Count || _buttons[buttonIndex] == null)
-                return;
-
-            if (_buttons[buttonIndex].Image == null)
-                return;
-
-            Color baseColor = _defaultColors.ContainsKey(buttonIndex) 
-                ? _defaultColors[buttonIndex] 
-                : _buttons[buttonIndex].Image.color;
-
-            _buttons[buttonIndex].Image.color = highlight 
-                ? baseColor * intensity 
-                : baseColor;
-        }
-
         public void SetButtonColor(int buttonIndex, Color color)
         {
-            if (buttonIndex < 0 || buttonIndex >= _buttons.Count || _buttons[buttonIndex] == null)
-                return;
-
-            if (_buttons[buttonIndex].Image != null)
-            {
-                _buttons[buttonIndex].Image.color = color;
-            }
-        }
-
-        public void SetButtonInteractable(int buttonIndex, bool interactable)
-        {
-            if (buttonIndex < 0 || buttonIndex >= _buttons.Count || _buttons[buttonIndex] == null)
-                return;
-
-            _buttons[buttonIndex].SetInteractable(interactable);
-        }
-
-        public void SetAllButtonsInteractable(bool interactable)
-        {
-            foreach (var button in _buttons)
-            {
-                if (button != null)
-                {
-                    button.SetInteractable(interactable);
-                }
-            }
+            _buttons[buttonIndex].SetColor(color);
         }
 
         public void ShowButtonFeedback(int buttonIndex, Color feedbackColor, float duration)
         {
-            if (buttonIndex < 0 || buttonIndex >= _buttons.Count || _buttons[buttonIndex] == null)
-                return;
-
-            ShowButtonFeedbackAsync(buttonIndex, feedbackColor, duration).Forget();
+            _buttons[buttonIndex].ShowFeedbackAsync(feedbackColor, duration).Forget();
         }
 
-        private async UniTaskVoid ShowButtonFeedbackAsync(int buttonIndex, Color feedbackColor, float duration)
+        public async UniTask FlashAllButtons(Color color, float duration)
         {
-            if (buttonIndex < 0 || buttonIndex >= _buttons.Count || _buttons[buttonIndex] == null)
-                return;
-
-            Image image = _buttons[buttonIndex].Image;
-            if (image == null)
-                return;
-
-            Color originalColor = image.color;
-            image.color = feedbackColor;
+            foreach (var button in _buttons)
+            {
+                button.SetColor(color);
+            }
 
             await UniTask.Delay((int)(duration * 1000));
 
-            if (image != null && _defaultColors.ContainsKey(buttonIndex))
+            foreach (var button in _buttons)
             {
-                image.color = _defaultColors[buttonIndex];
+                button.ResetToDefaultColor();
             }
         }
 
         public void ClearGrid()
         {
-            // Unsubscribe from events
             foreach (var button in _buttons)
             {
-                if (button != null)
-                {
-                    button.OnClicked -= HandleButtonClicked;
-                    Destroy(button.gameObject);
-                }
+                button.OnClicked -= HandleButtonClicked;
+                Destroy(button.gameObject);
             }
 
             _buttons.Clear();
-            _defaultColors.Clear();
         }
 
         private void OnDestroy()

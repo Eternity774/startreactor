@@ -1,38 +1,29 @@
+using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace StartReactor.Features.UI
 {
     /// <summary>
     /// GameUIView is a MonoBehaviour representing the UI view components in the game.
-    /// It provides access to UI elements like score display, round indicator, etc.
+    /// Pure view - no logic, just methods to update UI elements.
     /// </summary>
     public class GameUIView : MonoBehaviour
     {
         [SerializeField]
-        private Text _roundText;
-
-        [SerializeField]
-        private Text _scoreText;
-
-        [SerializeField]
-        private Text _sequenceLengthText;
-
-        [SerializeField]
-        private GameObject _gameOverPanel;
-
-        [SerializeField]
-        private Button _restartButton;
+        private TextMeshProUGUI _sequenceLengthText;
 
         [SerializeField]
         private Transform _popupContainer;
 
-        public Text RoundText => _roundText;
-        public Text ScoreText => _scoreText;
-        public Text SequenceLengthText => _sequenceLengthText;
-        public GameObject GameOverPanel => _gameOverPanel;
-        public Button RestartButton => _restartButton;
         public Transform PopupContainer => _popupContainer;
+
+        public void SetSequenceText(string text)
+        {
+            if (_sequenceLengthText != null)
+            {
+                _sequenceLengthText.text = text;
+            }
+        }
     }
 }
 

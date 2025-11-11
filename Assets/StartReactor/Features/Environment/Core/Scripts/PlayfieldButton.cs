@@ -1,67 +1,45 @@
 using System;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace StartReactor.Features.Environment
 {
-    /// <summary>
-    /// PlayfieldButton represents a single button in the gameplay grid.
-    /// Handles click events and exposes visual properties.
-    /// </summary>
-    public class PlayfieldButton : MonoBehaviour
+    public class PlayfieldButton : MonoBehaviour, IPointerDownHandler
     {
         public event Action<PlayfieldButton> OnClicked;
 
         [SerializeField]
-        private Button _button;
-
-        [SerializeField]
         private Image _image;
 
-        public Button Button => _button;
-        public Image Image => _image;
         public int ButtonIndex { get; private set; }
-
-        private void Awake()
-        {
-            if (_button == null)
-            {
-                _button = GetComponent<Button>();
-            }
-
-            if (_image == null)
-            {
-                _image = GetComponent<Image>();
-            }
-
-            if (_button != null)
-            {
-                _button.onClick.AddListener(HandleClick);
-            }
-        }
-
-        private void OnDestroy()
-        {
-            if (_button != null)
-            {
-                _button.onClick.RemoveListener(HandleClick);
-            }
-        }
+        private Color _defaultColor;
 
         public void Initialize(int buttonIndex)
         {
             ButtonIndex = buttonIndex;
+            _defaultColor = _image.color;
         }
 
-        public void SetInteractable(bool interactable)
+        public void SetColor(Color color)
         {
-            if (_button != null)
-            {
-                _button.interactable = interactable;
-            }
+            _image.color = color;
         }
 
-        private void HandleClick()
+        public void ResetToDefaultColor()
+        {
+            _image.color = _defaultColor;
+        }
+
+        public async UniTask ShowFeedbackAsync(Color feedbackColor, float duration)
+        {
+            SetColor(feedbackColor);
+            await UniTask.Delay((int)(duration * 1000));
+            ResetToDefaultColor();
+        }
+        
+        public void OnPointerDown(PointerEventData eventData)
         {
             OnClicked?.Invoke(this);
         }

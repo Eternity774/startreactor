@@ -10,12 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6bb8a6e576a8d524ea3da29c1768bd8e, type: 3}
-  m_Name: Level_02
+  m_Name: Level_04
   m_EditorClassIdentifier: 
-  LevelNumber: 1
-  LevelName: Level 1
-  InitialSequenceLength: 3
-  SequenceLengthIncrement: 1
-  ColorDisplayDuration: 1
-  ColorDisplayDelay: 0.3
-  ColorCount: 4
+  GridSize: {x: 4, y: 4}
+  Sequences: 0100000002000000030000000400000005000000

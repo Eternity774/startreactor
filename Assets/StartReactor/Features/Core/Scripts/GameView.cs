@@ -13,13 +13,13 @@ namespace StartReactor.Features.Core
     public class GameView : MonoBehaviour
     {
         public GameUIView UiView => _uiView;
-        public GameEnvironmentView EnvironmentView => _environmentView;
+        public GameEnvironmentView GameEnvironmentView => _gameEnvironmentView;
 
         [SerializeField]
         private GameUIView _uiView;
 
         [SerializeField]
-        private GameEnvironmentView _environmentView;
+        private GameEnvironmentView _gameEnvironmentView;
     }
 }
 

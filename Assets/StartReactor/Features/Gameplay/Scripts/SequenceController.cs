@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
@@ -8,43 +9,29 @@ using UnityEngine;
 
 namespace StartReactor.Features.Gameplay
 {
-    /// <summary>
-    /// SequenceController manages the sequence playback and input validation for the Start Reactor game.
-    /// It handles displaying the color sequence to the player and validating their input.
-    /// </summary>
     public class SequenceController : ControllerWithResultBase
     {
         private readonly GameModel _gameModel;
         private readonly IPlayfieldView _playfieldView;
-        private readonly IGameEventsRequestsModel _gameEventsModel;
 
         public SequenceController(
             IControllerFactory controllerFactory,
             GameModel gameModel,
-            IPlayfieldView playfieldView,
-            IGameEventsRequestsModel gameEventsModel)
+            IPlayfieldView playfieldView)
             : base(controllerFactory)
         {
             _gameModel = gameModel;
             _playfieldView = playfieldView;
-            _gameEventsModel = gameEventsModel;
         }
 
         protected override void OnStart()
         {
-            _gameModel.SequenceGenerated += OnSequenceGenerated;
-            _gameModel.RoundCompleted += OnRoundCompleted;
-            _gameModel.GameOver += OnGameOver;
             _playfieldView.OnButtonClicked += OnButtonClicked;
-
             StartGameLoop().Forget();
         }
 
         protected override void OnStop()
         {
-            _gameModel.SequenceGenerated -= OnSequenceGenerated;
-            _gameModel.RoundCompleted -= OnRoundCompleted;
-            _gameModel.GameOver -= OnGameOver;
             _playfieldView.OnButtonClicked -= OnButtonClicked;
         }
 
@@ -54,26 +41,11 @@ namespace StartReactor.Features.Gameplay
             {
                 _gameModel.ResetGame();
                 
-                // Play all sequences for the current level
-                while (_gameModel.CurrentSequenceIndex < _gameModel.CurrentLevel.Sequences.Count && !_gameModel.IsGameOver)
+                while (_gameModel.CurrentSequenceIndex < _gameModel.CurrentLevel.Sequences.Count)
                 {
                     await PlaySequenceRoundAsync(CancellationToken);
-                    
-                    if (_gameModel.IsGameOver)
-                    {
-                        break;
-                    }
                 }
                 
-                if (_gameModel.IsGameOver)
-                {
-                    // Game over - complete to trigger LoseController
-                    Complete();
-                    return;
-                }
-                
-                // All sequences completed - level finished
-                // Complete to trigger WinController
                 Complete();
                 return;
             }
@@ -81,60 +53,37 @@ namespace StartReactor.Features.Gameplay
 
         private async UniTask PlaySequenceRoundAsync(CancellationToken cancellationToken)
         {
-            // Generate and play sequence
             _gameModel.GenerateNewSequence();
-            await PlaySequenceAsync(_gameModel.CurrentSequence, cancellationToken);
+            int initialSequenceIndex = _gameModel.CurrentSequenceIndex;
             
-            // Wait a bit before allowing input
-            await UniTask.Delay(500, cancellationToken: cancellationToken);
+            bool sequenceCompleted = false;
             
-            // Start input phase
-            _gameModel.StartInputPhase();
-            _playfieldView.SetAllButtonsInteractable(true);
-        }
-
-        private async UniTask PlaySequenceAsync(List<int> sequence, CancellationToken cancellationToken)
-        {
-            _playfieldView.SetAllButtonsInteractable(false);
-
-            foreach (int buttonIndex in sequence)
+            while (!sequenceCompleted && !cancellationToken.IsCancellationRequested)
             {
-                cancellationToken.ThrowIfCancellationRequested();
+                await PlaySequence(_gameModel.CurrentSequence, cancellationToken);
                 
-                // Highlight the button
-                _playfieldView.SetButtonHighlight(buttonIndex, true, 1.5f);
+                _gameModel.StartInputPhase();
                 
-                // Use general game configuration for display timing
-                await UniTask.Delay((int)(_gameModel.GameConfiguration.ButtonDisplayDuration * 1000), cancellationToken: cancellationToken);
+                while (_gameModel.IsWaitingForInput && !cancellationToken.IsCancellationRequested)
+                {
+                    await UniTask.Yield();
+                }
                 
-                // Unhighlight
-                _playfieldView.SetButtonHighlight(buttonIndex, false, 1.5f);
-                
-                // Use general game configuration for display delay
-                await UniTask.Delay((int)(_gameModel.GameConfiguration.ButtonDisplayDelay * 1000), cancellationToken: cancellationToken);
+                if (_gameModel.CurrentSequenceIndex > initialSequenceIndex)
+                {
+                    if (_gameModel.CurrentSequenceIndex < _gameModel.CurrentLevel.Sequences.Count)
+                    {
+                        await UniTask.Delay(TimeSpan.FromSeconds(0.5f), cancellationToken: cancellationToken);
+                    }
+                    
+                    sequenceCompleted = true;
+                }
+                else
+                {
+                    await FlashAllButtons(_gameModel.GameConfiguration.ErrorColor, cancellationToken);
+                    _gameModel.ResetCurrentSequence();
+                }
             }
-        }
-
-        private void OnSequenceGenerated(List<int> sequence)
-        {
-            // Sequence generation is handled in PlayRoundAsync
-        }
-
-        private void OnRoundCompleted()
-        {
-            HandleRoundCompletedAsync().Forget();
-        }
-
-        private async UniTaskVoid HandleRoundCompletedAsync()
-        {
-            _playfieldView.SetAllButtonsInteractable(false);
-            
-            await UniTask.Delay(1000, cancellationToken: CancellationToken);
-        }
-
-        private void OnGameOver()
-        {
-            _playfieldView.SetAllButtonsInteractable(false);
         }
 
         private void OnButtonClicked(int buttonIndex)
@@ -144,12 +93,44 @@ namespace StartReactor.Features.Gameplay
 
             bool isValid = _gameModel.ValidateInput(buttonIndex);
             
-            // Show visual feedback
-            Color feedbackColor = isValid 
-                ? _gameModel.GameConfiguration.CorrectColor 
-                : _gameModel.GameConfiguration.ErrorColor;
-            
-            _playfieldView.ShowButtonFeedback(buttonIndex, feedbackColor, 0.2f);
+            if (isValid)
+            {
+                bool sequenceCompleted = !_gameModel.IsWaitingForInput;
+                
+                if (sequenceCompleted)
+                {
+                    FlashAllButtons(_gameModel.GameConfiguration.CorrectColor, CancellationToken).Forget();
+                }
+                else
+                {
+                    _playfieldView.SetButtonColor(buttonIndex, _gameModel.GameConfiguration.CorrectColor);
+                    _playfieldView.ShowButtonFeedback(buttonIndex, _gameModel.GameConfiguration.CorrectColor, 0.2f);
+                }
+            }
+        }
+
+        private async UniTask FlashAllButtons(Color color, CancellationToken cancellationToken)
+        {
+            await _playfieldView.FlashAllButtons(color, _gameModel.GameConfiguration.ErrorFlashDuration);
+            await UniTask.Delay(TimeSpan.FromSeconds(1f), cancellationToken: cancellationToken);
+        }
+
+        private async UniTask PlaySequence(List<int> sequence, CancellationToken cancellationToken)
+        {
+            Color sequenceColor = _gameModel.GameConfiguration.SequenceColor;
+
+            foreach (int buttonIndex in sequence)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                
+                _playfieldView.SetButtonColor(buttonIndex, sequenceColor);
+                
+                await UniTask.Delay(TimeSpan.FromSeconds(_gameModel.GameConfiguration.SequenceButtonHighlightDuration), cancellationToken: cancellationToken);
+                
+                _playfieldView.ShowButtonFeedback(buttonIndex, sequenceColor, 0.1f);
+                
+                await UniTask.Delay(TimeSpan.FromSeconds(_gameModel.GameConfiguration.ButtonDisplayDelay + 0.1f), cancellationToken: cancellationToken);
+            }
         }
     }
 }

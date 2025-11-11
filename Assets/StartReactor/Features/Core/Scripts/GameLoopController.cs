@@ -6,11 +6,6 @@ using StartReactor.Features.UI;
 
 namespace StartReactor.Features.Core
 {
-    /// <summary>
-    /// GameLoopController extends ControllerWithResultBase to manage a game loop asynchronously.
-    /// It initializes a GameModel and handles restart requests.
-    /// The controller starts and stops related controllers (GameUIController, GameEnvironmentController, and SequenceController).
-    /// </summary>
     public class GameLoopController : ControllerWithResultBase
     {
         private readonly GameModel _gameModel;

@@ -6,8 +6,8 @@ namespace StartReactor.Features.Core
     public class GameConfiguration : ScriptableObject
     {
         [Header("Colors")]
+        public Color SequenceColor = Color.yellow;
         public Color CorrectColor = Color.green;
-        
         public Color ErrorColor = Color.red;
         
         [Header("Display Settings")]
@@ -16,6 +16,13 @@ namespace StartReactor.Features.Core
         
         [Range(0.1f, 1.0f)]
         public float ButtonDisplayDelay = 0.3f;
+        
+        [Range(0.1f, 2.0f)]
+        [Tooltip("How long each button stays highlighted (yellow) during sequence playback")]
+        public float SequenceButtonHighlightDuration = 1.0f;
+        
+        [Range(0.1f, 2.0f)]
+        public float ErrorFlashDuration = 0.5f;
     }
 }
 

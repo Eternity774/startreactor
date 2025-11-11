@@ -24,15 +24,9 @@ namespace StartReactor.Features.Core
             builder.Register<IControllerFactory, ControllerFactory>(Lifetime.Scoped);
             builder.Register<BootstrapController>(Lifetime.Transient);
             builder.Register<GameLoopController>(Lifetime.Transient);
-
-            builder.RegisterInstance(_gameView.EnvironmentView);
             
-            // Register PlayfieldView as IPlayfieldView interface
-            if (_gameView.EnvironmentView.PlayfieldView != null)
-            {
-                builder.RegisterInstance<IPlayfieldView>(_gameView.EnvironmentView.PlayfieldView);
-            }
-            
+            builder.RegisterInstance(_gameView.GameEnvironmentView);
+            builder.RegisterInstance<IPlayfieldView>(_gameView.GameEnvironmentView.PlayfieldView);
             builder.RegisterInstance(_gameView.UiView);
 
             builder.Register<GameModel>(Lifetime.Singleton);
@@ -41,7 +35,6 @@ namespace StartReactor.Features.Core
             builder.Register<GameEnvironmentController>(Lifetime.Transient);
             builder.Register<SequenceController>(Lifetime.Transient);
             builder.Register<WinController>(Lifetime.Transient);
-            builder.Register<LoseController>(Lifetime.Transient);
 
             builder.Register<GameUIController>(Lifetime.Transient);
 
@@ -53,7 +46,6 @@ namespace StartReactor.Features.Core
             builder.Register<IPopupFactory, PopupFactory>(Lifetime.Singleton);
             
             builder.Register<IWinStateHandler, WinStateHandler>(Lifetime.Singleton);
-            builder.Register<ILoseStateHandler, LoseStateHandler>(Lifetime.Singleton);
         }
     }
 }

@@ -32,10 +32,8 @@ namespace StartReactor.Core
 
         public void Dispose()
         {
-            _cancellationTokenSource?.Cancel();
-            _cancellationTokenSource?.Dispose();
-
-            _cancellationTokenSource = null;
+            _cancellationTokenSource.Cancel();
+            _cancellationTokenSource.Dispose();
         }
     }
 }

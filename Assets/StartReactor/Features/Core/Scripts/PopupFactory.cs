@@ -20,29 +20,16 @@ namespace StartReactor.Features.Core
                 addressableKey,
                 cancellationToken);
 
-            if (popupPrefab == null)
-            {
-                Debug.LogError($"Failed to load popup with key: {addressableKey}");
-                return null;
-            }
-
             GameObject popupInstance = Object.Instantiate(popupPrefab, container);
             
             T popup = popupInstance.GetComponent<T>();
-
-            if (popup == null)
-            {
-                Debug.LogError($"Popup prefab is missing component of type {typeof(T).Name}!");
-                Object.Destroy(popupInstance);
-                return null;
-            }
 
             return popup;
         }
 
         public void ReleasePopup(IPopupView popup)
         {
-            if (popup != null && popup is MonoBehaviour monoBehaviour)
+            if (popup is MonoBehaviour monoBehaviour)
             {
                 Object.Destroy(monoBehaviour.gameObject);
             }

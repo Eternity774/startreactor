@@ -5,20 +5,17 @@ using Cysharp.Threading.Tasks;
 
 namespace StartReactor.Features.Core
 {
-	/// <summary>
-	/// GameModel manages game logic for the Start Reactor sequence memory game.
-	/// It handles sequence generation, validation, and game state management.
-	/// </summary>
 	public class GameModel
 	{
 		public event Action<List<int>> SequenceGenerated;
 		public event Action<int> SequenceValidated;
-		public event Action GameOver;
+		public event Action SequenceFailed;
 		public event Action RoundCompleted;
 		public event Action LevelCompleted;
 
 		private LevelConfiguration _currentLevel;
 		private List<LevelConfiguration> _levels;
+		private bool _isInitialized;
 
 		private int _currentInputIndex;
 
@@ -30,62 +27,60 @@ namespace StartReactor.Features.Core
 		public int CurrentSequenceLength { get; private set; }
 		public List<int> CurrentSequence { get; private set; }
 		public bool IsWaitingForInput { get; private set; }
-		public bool IsGameOver { get; private set; }
 
 		private readonly ResourcesProvider _resourcesProvider;
 		private readonly LevelsProvider _levelsProvider;
-		private readonly System.Random _random;
+		private readonly Random _random;
 
 		public GameModel(ResourcesProvider resourcesProvider, LevelsProvider levelsProvider)
 		{
 			_resourcesProvider = resourcesProvider;
 			_levelsProvider = levelsProvider;
-			_random = new System.Random();
+			_random = new Random();
+			CurrentSequence = new List<int>();
 		}
 
 		public async UniTask InitializeAsync(CancellationToken cancellationToken)
 		{
-			(GameConfiguration, _levels) = await UniTask.WhenAll(
-				_resourcesProvider.LoadAsync<GameConfiguration>(AddressableKeys.GameConfiguration, cancellationToken),
-				_levelsProvider.LoadAllLevelsAsync(cancellationToken));
-
-			cancellationToken.ThrowIfCancellationRequested();
-
-			if (_levels == null || _levels.Count == 0)
+			if (!_isInitialized)
 			{
-				throw new Exception("No levels found. At least one level must be configured.");
+				(GameConfiguration, _levels) = await UniTask.WhenAll(
+					_resourcesProvider.LoadAsync<GameConfiguration>(AddressableKeys.GameConfiguration, cancellationToken),
+					_levelsProvider.LoadAllLevelsAsync(cancellationToken));
+
+				cancellationToken.ThrowIfCancellationRequested();
+
+				if (_levels.Count == 0)
+				{
+					throw new Exception("No levels found. At least one level must be configured.");
+				}
+
+				_isInitialized = true;
 			}
 
-			// Start with first level
-			CurrentLevelIndex = 0;
-			_currentLevel = _levels[0];
+			if (_currentLevel == null || CurrentLevelIndex < 0 || CurrentLevelIndex >= _levels.Count)
+			{
+				CurrentLevelIndex = 0;
+				_currentLevel = _levels[0];
+			}
 
 			ResetGame();
 		}
 
 		public void SetLevel(int levelIndex)
 		{
-			if (_levels != null && levelIndex >= 0 && levelIndex < _levels.Count)
-			{
-				CurrentLevelIndex = levelIndex;
-				_currentLevel = _levels[levelIndex];
-				ResetGame();
-			}
+			CurrentLevelIndex = levelIndex;
+			_currentLevel = _levels[levelIndex];
+			ResetGame();
 		}
 
 		public void ResetGame()
 		{
-			if (_currentLevel == null || _currentLevel.Sequences == null || _currentLevel.Sequences.Count == 0)
-			{
-				throw new Exception("Current level has no sequences configured.");
-			}
-			
 			CurrentSequenceIndex = 0;
 			CurrentSequenceLength = _currentLevel.Sequences[0];
-			CurrentSequence = new List<int>();
+			CurrentSequence.Clear();
 			_currentInputIndex = 0;
 			IsWaitingForInput = false;
-			IsGameOver = false;
 		}
 
 		public void GenerateNewSequence()
@@ -94,8 +89,7 @@ namespace StartReactor.Features.Core
 			_currentInputIndex = 0;
 			IsWaitingForInput = false;
 
-			// Generate random button indices based on grid size
-			int totalButtons = _currentLevel.GridSize.x * _currentLevel.GridSize.y;
+			var totalButtons = _currentLevel.GridSize.x * _currentLevel.GridSize.y;
 
 			for (var i = 0; i < CurrentSequenceLength; i++)
 			{
@@ -114,7 +108,7 @@ namespace StartReactor.Features.Core
 
 		public bool ValidateInput(int colorIndex)
 		{
-			if (!IsWaitingForInput || IsGameOver)
+			if (!IsWaitingForInput)
 			{
 				return false;
 			}
@@ -133,35 +127,36 @@ namespace StartReactor.Features.Core
 
 				if (_currentInputIndex >= CurrentSequence.Count)
 				{
-					// Sequence completed successfully
 					IsWaitingForInput = false;
-					
-					// Move to next sequence if available
+
 					CurrentSequenceIndex++;
 					if (CurrentSequenceIndex < _currentLevel.Sequences.Count)
 					{
-						// Next sequence in the level
 						CurrentSequenceLength = _currentLevel.Sequences[CurrentSequenceIndex];
 						RoundCompleted?.Invoke();
 					}
 					else
 					{
-						// All sequences completed - level finished
 						RoundCompleted?.Invoke();
 						LevelCompleted?.Invoke();
 					}
+
 					return true;
 				}
 			}
 			else
 			{
-				// Wrong input - game over
 				IsWaitingForInput = false;
-				IsGameOver = true;
-				GameOver?.Invoke();
+				SequenceFailed?.Invoke();
 			}
 
 			return isCorrect;
+		}
+
+		public void ResetCurrentSequence()
+		{
+			_currentInputIndex = 0;
+			IsWaitingForInput = false;
 		}
 	}
 }

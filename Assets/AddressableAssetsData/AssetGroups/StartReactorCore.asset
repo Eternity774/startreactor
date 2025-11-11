@@ -30,16 +30,15 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 5c3a6f8df5af7054d8f150019524899a
-    m_Address: Levels
+  - m_GUID: 32307cefb538e7145b27b594f44d5a87
+    m_Address: GameConfiguration
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d2646aca2b22f10429212fb244b229e8
-    m_Address: CoreGameConfiguration
+  - m_GUID: a67af393e4b48724c919ec7dece65dba
+    m_Address: LevelsConfig
     m_ReadOnly: 0
-    m_SerializedLabels:
-    - default
+    m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: e369f8dcae003584999eb7d22e7c2ac5, type: 2}
