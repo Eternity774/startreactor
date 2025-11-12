@@ -1,4 +1,6 @@
 using System;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,20 +14,15 @@ namespace StartReactor.Features.UI
     {
         [SerializeField]
         private Button _nextButton;
-
-        public event Action OnNextClicked;
-
+        
+        private bool _wasNextButtonClicked = false;
+        
         private void Awake()
         {
             if (_nextButton != null)
             {
                 _nextButton.onClick.AddListener(HandleNextClicked);
             }
-        }
-
-        private void HandleNextClicked()
-        {
-            OnNextClicked?.Invoke();
         }
 
         private void OnDestroy()
@@ -36,14 +33,30 @@ namespace StartReactor.Features.UI
             }
         }
 
-        public void Show()
+        public UniTask Show(CancellationToken cancellationToken)
         {
             gameObject.SetActive(true);
+            
+            return UniTask.CompletedTask;
         }
 
-        public void Hide()
+        public UniTask Hide(CancellationToken cancellationToken)
         {
             gameObject.SetActive(false);
+            
+            Destroy(gameObject);
+            
+            return UniTask.CompletedTask;
+        }
+
+        public async UniTask WaitForNextButtonClicked(CancellationToken token)
+        {
+            await UniTask.WaitUntil(() => _wasNextButtonClicked, cancellationToken: token);
+        }
+        
+        private void HandleNextClicked()
+        {
+            _wasNextButtonClicked = true;
         }
     }
 }

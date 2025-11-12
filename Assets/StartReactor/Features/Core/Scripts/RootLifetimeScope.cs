@@ -35,6 +35,7 @@ namespace StartReactor.Features.Core
             builder.Register<GameEnvironmentController>(Lifetime.Transient);
             builder.Register<SequenceController>(Lifetime.Transient);
             builder.Register<WinController>(Lifetime.Transient);
+            builder.Register<WinPopupController>(Lifetime.Transient);
 
             builder.Register<GameUIController>(Lifetime.Transient);
 
@@ -44,8 +45,6 @@ namespace StartReactor.Features.Core
             builder.Register<IGridLayoutConfigurator, GridLayoutConfigurator>(Lifetime.Singleton);
             
             builder.Register<IPopupFactory, PopupFactory>(Lifetime.Singleton);
-            
-            builder.Register<IWinStateHandler, WinStateHandler>(Lifetime.Singleton);
         }
     }
 }

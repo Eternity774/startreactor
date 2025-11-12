@@ -27,7 +27,7 @@ namespace StartReactor.Features.Core
             return popup;
         }
 
-        public void ReleasePopup(IPopupView popup)
+        public void ReleasePopup<T>(T popup) where T : class, IPopupView
         {
             if (popup is MonoBehaviour monoBehaviour)
             {
