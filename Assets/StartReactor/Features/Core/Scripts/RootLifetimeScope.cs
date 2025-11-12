@@ -9,10 +9,6 @@ using VContainer.Unity;
 
 namespace StartReactor.Features.Core
 {
-    /// <summary>
-    /// RootLifetimeScope sets up the DI container for the game application, configuring essential components such as
-    /// the entry point (Bootstrap), controllers, and services. This setup ensures efficient dependency management and lifecycle handling during gameplay.
-    /// </summary>
     public class RootLifetimeScope : LifetimeScope
     {
         [SerializeField]

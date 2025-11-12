@@ -3,10 +3,6 @@ using UnityEngine;
 
 namespace StartReactor.Features.UI
 {
-    /// <summary>
-    /// GameUIView is a MonoBehaviour representing the UI view components in the game.
-    /// Pure view - no logic, just methods to update UI elements.
-    /// </summary>
     public class GameUIView : MonoBehaviour
     {
         [SerializeField]

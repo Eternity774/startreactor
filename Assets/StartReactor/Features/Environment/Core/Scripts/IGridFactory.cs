@@ -7,9 +7,6 @@ using UnityEngine;
 
 namespace StartReactor.Features.Environment
 {
-    /// <summary>
-    /// Factory interface for creating gameplay grid buttons.
-    /// </summary>
     public interface IGridFactory
     {
         UniTask<List<PlayfieldButton>> CreateGridAsync(

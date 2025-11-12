@@ -4,10 +4,6 @@ using StartReactor.Features.Core;
 
 namespace StartReactor.Core
 {
-    /// <summary>
-    /// BootstrapController extends RootController to manage the initialization flow of the application.
-    /// It asynchronously starts a game loop by repeatedly executing GameLoopController instances until cancellation is requested.
-    /// </summary>
     public class BootstrapController : RootController
     {
         public BootstrapController(IControllerFactory controllerFactory)

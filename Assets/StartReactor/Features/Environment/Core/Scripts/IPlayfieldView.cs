@@ -5,9 +5,6 @@ using UnityEngine;
 
 namespace StartReactor.Features.Environment
 {
-    /// <summary>
-    /// Interface for playfield view - handles visual representation of the gameplay grid.
-    /// </summary>
     public interface IPlayfieldView
     {
         event Action<int> OnButtonClicked;

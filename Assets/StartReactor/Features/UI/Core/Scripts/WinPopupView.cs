@@ -6,10 +6,6 @@ using UnityEngine.UI;
 
 namespace StartReactor.Features.UI
 {
-    /// <summary>
-    /// WinPopupView represents the win popup UI.
-    /// Contains a Next button to proceed to the next level.
-    /// </summary>
     public class WinPopupView : MonoBehaviour, IWinPopupView
     {
         [SerializeField]

@@ -3,12 +3,6 @@ using VContainer;
 
 namespace StartReactor.Core
 {
-    /// <summary>
-    /// The ControllerFactory class implements the IControllerFactory interface to facilitate the creation
-    /// of controllers using a project-specific Dependency Injection (DI) container.
-    /// It utilizes an IObjectResolver instance to resolve and instantiate controllers of type T
-    /// that implement the IController interface.
-    /// </summary>
     public class ControllerFactory : IControllerFactory
     {
         private readonly IObjectResolver _container;
