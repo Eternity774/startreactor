@@ -20,11 +20,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 1220d4e172b680f4d9e60746b39e7f6d
-    m_Address: LosePopup
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 14abb1ce0261d834890540fe949e1386
     m_Address: PlayfieldButton
     m_ReadOnly: 0

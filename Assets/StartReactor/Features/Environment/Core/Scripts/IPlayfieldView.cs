@@ -9,12 +9,14 @@ namespace StartReactor.Features.Environment
     {
         event Action<int> OnButtonClicked;
         
+        Transform GridContainer { get; }
+
         void InitializeButtons(List<PlayfieldButton> buttons);
         void SetButtonColor(int buttonIndex, Color color);
+        void SetAllButtonsColor(Color color);
+        void ResetAllButtonsToDefaultColor();
         void ShowButtonFeedback(int buttonIndex, Color feedbackColor, float duration);
-        UniTask FlashAllButtons(Color color, float duration);
         void ClearGrid();
-        Transform GridContainer { get; }
     }
 }
 

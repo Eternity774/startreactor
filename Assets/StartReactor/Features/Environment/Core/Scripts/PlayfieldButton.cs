@@ -8,13 +8,14 @@ namespace StartReactor.Features.Environment
 {
     public class PlayfieldButton : MonoBehaviour, IPointerDownHandler
     {
-        public event Action<PlayfieldButton> OnClicked;
-
         [SerializeField]
         private Image _image;
 
-        public int ButtonIndex { get; private set; }
         private Color _defaultColor;
+
+        public int ButtonIndex { get; private set; }
+
+        public event Action<PlayfieldButton> OnClicked;
 
         public void Initialize(int buttonIndex)
         {
@@ -32,10 +33,12 @@ namespace StartReactor.Features.Environment
             _image.color = _defaultColor;
         }
 
-        public async UniTask ShowFeedbackAsync(Color feedbackColor, float duration)
+        public async UniTask ShowColorFeedback(Color color, float duration)
         {
-            SetColor(feedbackColor);
-            await UniTask.Delay((int)(duration * 1000));
+            SetColor(color);
+            
+            await UniTask.Delay(TimeSpan.FromSeconds(duration));
+            
             ResetToDefaultColor();
         }
         

@@ -2,22 +2,20 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using Playtika.Controllers;
 using StartReactor.Features.Core;
+using StartReactor.Features.UI;
 
 namespace StartReactor.Features.Gameplay
 {
     public class WinController : ControllerWithResultBase
     {
         private readonly GameModel _gameModel;
-        private readonly IGameEventsRequestsModel _gameEventsModel;
 
         public WinController(
             IControllerFactory controllerFactory,
-            GameModel gameModel,
-            IGameEventsRequestsModel gameEventsModel)
+            GameModel gameModel)
             : base(controllerFactory)
         {
             _gameModel = gameModel;
-            _gameEventsModel = gameEventsModel;
         }
 
         protected override async UniTask OnFlowAsync(CancellationToken cancellationToken)
@@ -28,8 +26,6 @@ namespace StartReactor.Features.Gameplay
             }
 
             await ExecuteAndWaitResultAsync<WinPopupController>(cancellationToken);
-
-            _gameEventsModel.RequestRestart();
 
             Complete();
         }

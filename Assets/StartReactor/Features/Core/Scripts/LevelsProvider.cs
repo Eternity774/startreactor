@@ -48,12 +48,6 @@ namespace StartReactor.Features.Core
                 return new List<LevelConfiguration>();
             }
         }
-
-        public async UniTask<LevelConfiguration> LoadLevelByIndexAsync(int levelIndex, CancellationToken cancellationToken)
-        {
-            List<LevelConfiguration> levels = await LoadAllLevelsAsync(cancellationToken);
-            return levels[levelIndex];
-        }
     }
 }
 

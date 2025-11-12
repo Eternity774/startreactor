@@ -1,9 +1,10 @@
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using StartReactor.Features.Core;
 using StartReactor.Features.UI;
 using UnityEngine;
 
-namespace StartReactor.Features.Core
+namespace StartReactor.Features.UI
 {
     public class PopupFactory : IPopupFactory
     {

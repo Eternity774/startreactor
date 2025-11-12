@@ -4,7 +4,7 @@ using Playtika.Controllers;
 using StartReactor.Features.Core;
 using StartReactor.Features.UI;
 
-namespace StartReactor.Features.Gameplay
+namespace StartReactor.Features.UI
 {
     public class WinPopupController : ControllerWithResultBase
     {

@@ -26,7 +26,6 @@ namespace StartReactor.Features.Core
             builder.RegisterInstance(_gameView.UiView);
 
             builder.Register<GameModel>(Lifetime.Singleton);
-            builder.Register<IGameEventsModel, IGameEventsRequestsModel, GameEventsModel>(Lifetime.Singleton);
 
             builder.Register<GameEnvironmentController>(Lifetime.Transient);
             builder.Register<SequenceController>(Lifetime.Transient);
@@ -39,6 +38,7 @@ namespace StartReactor.Features.Core
             builder.Register<LevelsProvider>(Lifetime.Singleton);
             builder.Register<IGridFactory, GridFactory>(Lifetime.Singleton);
             builder.Register<IGridLayoutConfigurator, GridLayoutConfigurator>(Lifetime.Singleton);
+            builder.Register<IGridService, GridService>(Lifetime.Singleton);
             
             builder.Register<IPopupFactory, PopupFactory>(Lifetime.Singleton);
         }

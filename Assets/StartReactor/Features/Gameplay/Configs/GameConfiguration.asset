@@ -12,10 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6898a4cedf920704883cc0438033803f, type: 3}
   m_Name: GameConfiguration
   m_EditorClassIdentifier: 
-  SequenceColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  CorrectColor: {r: 0, g: 1, b: 0, a: 1}
-  ErrorColor: {r: 1, g: 0, b: 0, a: 1}
-  ButtonDisplayDuration: 0.75
-  ButtonDisplayDelay: 0.3
-  SequenceButtonHighlightDuration: 0.5
-  ErrorFlashDuration: 0.5
+  _disabledColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
+  _sequenceColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  _correctColor: {r: 0, g: 1, b: 0, a: 1}
+  _errorColor: {r: 1, g: 0, b: 0, a: 1}
+  _buttonColorFeedbackDuration: 0.3
+  _buttonDisplayDelay: 0.3
+  _sequenceButtonHighlightDuration: 0.5
+  _errorFlashDuration: 0.5
+  _sequenceCompletionDelay: 0.5
+  _sequenceWinDelay: 0.5
+  _flashAllButtonsDelay: 0.4
+  _sequenceButtonPostFeedbackDelay: 0.3
+  _gridCreationDelay: 1.5

@@ -9,26 +9,13 @@ namespace StartReactor.Features.Core
     public class GameLoopController : ControllerWithResultBase
     {
         private readonly GameModel _gameModel;
-        private readonly IGameEventsModel _gameEventsModel;
 
         public GameLoopController(
             IControllerFactory controllerFactory,
-            GameModel gameModel,
-            IGameEventsModel gameEventsModel)
+            GameModel gameModel)
             : base(controllerFactory)
         {
             _gameModel = gameModel;
-            _gameEventsModel = gameEventsModel;
-        }
-
-        protected override void OnStart()
-        {
-            _gameEventsModel.RestartRequested += OnRestartRequested;
-        }
-
-        protected override void OnStop()
-        {
-            _gameEventsModel.RestartRequested -= OnRestartRequested;
         }
 
         protected override async UniTask OnFlowAsync(CancellationToken cancellationToken)
@@ -37,12 +24,7 @@ namespace StartReactor.Features.Core
             cancellationToken.ThrowIfCancellationRequested();
 
             Execute<GameUIController>();
-            ExecuteAndWaitResultAsync<GameEnvironmentController>(CancellationToken).Forget();
-        }
-
-        private void OnRestartRequested()
-        {
-            Complete();
+            await ExecuteAndWaitResultAsync<GameEnvironmentController>(cancellationToken);
         }
     }
 }

@@ -8,9 +8,6 @@ namespace StartReactor.Features.Core
 	public class GameModel
 	{
 		public event Action<List<int>> SequenceGenerated;
-		public event Action<int> SequenceValidated;
-		public event Action SequenceFailed;
-		public event Action RoundCompleted;
 		public event Action LevelCompleted;
 
 		private LevelConfiguration _currentLevel;
@@ -55,17 +52,21 @@ namespace StartReactor.Features.Core
 					throw new Exception("No levels found. At least one level must be configured.");
 				}
 
-				_isInitialized = true;
-			}
-
-			if (_currentLevel == null || CurrentLevelIndex < 0 || CurrentLevelIndex >= _levels.Count)
-			{
-				CurrentLevelIndex = 0;
-				_currentLevel = _levels[0];
-			}
-
-			ResetGame();
+			_isInitialized = true;
 		}
+
+		if (_currentLevel == null || CurrentLevelIndex < 0 || CurrentLevelIndex >= _levels.Count)
+		{
+			CurrentLevelIndex = 0;
+			_currentLevel = _levels[0];
+		}
+		else if (_currentLevel != _levels[CurrentLevelIndex])
+		{
+			_currentLevel = _levels[CurrentLevelIndex];
+		}
+		
+		ResetGame();
+	}
 
 		public void SetLevel(int levelIndex)
 		{
@@ -106,7 +107,7 @@ namespace StartReactor.Features.Core
 			IsWaitingForInput = true;
 		}
 
-		public bool ValidateInput(int colorIndex)
+		public bool ValidateInput(int buttonIndex)
 		{
 			if (!IsWaitingForInput)
 			{
@@ -118,12 +119,11 @@ namespace StartReactor.Features.Core
 				return false;
 			}
 
-			var isCorrect = CurrentSequence[_currentInputIndex] == colorIndex;
+			var isCorrect = CurrentSequence[_currentInputIndex] == buttonIndex;
 
 			if (isCorrect)
 			{
 				_currentInputIndex++;
-				SequenceValidated?.Invoke(_currentInputIndex);
 
 				if (_currentInputIndex >= CurrentSequence.Count)
 				{
@@ -133,11 +133,9 @@ namespace StartReactor.Features.Core
 					if (CurrentSequenceIndex < _currentLevel.Sequences.Count)
 					{
 						CurrentSequenceLength = _currentLevel.Sequences[CurrentSequenceIndex];
-						RoundCompleted?.Invoke();
 					}
 					else
 					{
-						RoundCompleted?.Invoke();
 						LevelCompleted?.Invoke();
 					}
 
@@ -147,7 +145,6 @@ namespace StartReactor.Features.Core
 			else
 			{
 				IsWaitingForInput = false;
-				SequenceFailed?.Invoke();
 			}
 
 			return isCorrect;

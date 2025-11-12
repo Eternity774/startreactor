@@ -19,8 +19,8 @@ namespace StartReactor.Features.Environment
         public void InitializeButtons(List<PlayfieldButton> buttons)
         {
             ClearGrid();
+            
             _buttons = buttons;
-
             foreach (var button in _buttons)
             {
                 button.OnClicked += HandleButtonClicked;
@@ -37,24 +37,25 @@ namespace StartReactor.Features.Environment
             _buttons[buttonIndex].SetColor(color);
         }
 
-        public void ShowButtonFeedback(int buttonIndex, Color feedbackColor, float duration)
-        {
-            _buttons[buttonIndex].ShowFeedbackAsync(feedbackColor, duration).Forget();
-        }
-
-        public async UniTask FlashAllButtons(Color color, float duration)
+        public void SetAllButtonsColor(Color color)
         {
             foreach (var button in _buttons)
             {
                 button.SetColor(color);
             }
+        }
 
-            await UniTask.Delay((int)(duration * 1000));
-
+        public void ResetAllButtonsToDefaultColor()
+        {
             foreach (var button in _buttons)
             {
                 button.ResetToDefaultColor();
             }
+        }
+
+        public void ShowButtonFeedback(int buttonIndex, Color feedbackColor, float duration)
+        {
+            _buttons[buttonIndex].ShowColorFeedback(feedbackColor, duration).Forget();
         }
 
         public void ClearGrid()

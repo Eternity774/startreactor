@@ -15,10 +15,7 @@ namespace StartReactor.Features.UI
 
         public void SetSequenceText(string text)
         {
-            if (_sequenceLengthText != null)
-            {
-                _sequenceLengthText.text = text;
-            }
+            _sequenceLengthText.text = text;
         }
     }
 }

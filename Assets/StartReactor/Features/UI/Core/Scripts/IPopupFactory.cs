@@ -3,7 +3,7 @@ using Cysharp.Threading.Tasks;
 using StartReactor.Features.UI;
 using UnityEngine;
 
-namespace StartReactor.Features.Core
+namespace StartReactor.Features.UI
 {
     public interface IPopupFactory
     {
