@@ -34,10 +34,9 @@ namespace StartReactor.Features.Core
 
             builder.Register<GameUIController>(Lifetime.Transient);
 
-            builder.Register<ResourcesProvider>(Lifetime.Singleton);
-            builder.Register<LevelsProvider>(Lifetime.Singleton);
+			builder.Register<ResourcesProvider>(Lifetime.Singleton);
+			builder.Register<ILevelsProvider, LevelsProvider>(Lifetime.Singleton);
             builder.Register<IGridFactory, GridFactory>(Lifetime.Singleton);
-            builder.Register<IGridLayoutConfigurator, GridLayoutConfigurator>(Lifetime.Singleton);
             builder.Register<IGridService, GridService>(Lifetime.Singleton);
             
             builder.Register<IPopupFactory, PopupFactory>(Lifetime.Singleton);

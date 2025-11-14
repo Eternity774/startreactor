@@ -31,7 +31,7 @@ namespace StartReactor.Features.Core
         [SerializeField]
         private float _sequenceButtonPostFeedbackDelay = 0.1f;
         [SerializeField]
-        private float _gridCreationDelay = 1.5f;
+        private float _delayAfterGridCreated = 1.5f;
 
         public Color DisabledColor => _disabledColor;
         public Color SequenceColor => _sequenceColor;
@@ -44,7 +44,7 @@ namespace StartReactor.Features.Core
         public float SequenceWinDelay => _sequenceWinDelay;
         public float SequenceCompletionDelay => _sequenceCompletionDelay;
         public float SequenceButtonPostFeedbackDelay => _sequenceButtonPostFeedbackDelay;
-        public float GridCreationDelay => _gridCreationDelay;
+        public float DelayAfterGridCreated => _delayAfterGridCreated;
     }
 }
 

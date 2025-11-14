@@ -1,12 +1,14 @@
+using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using StartReactor.Features.Core;
+using UnityEngine;
 
 namespace StartReactor.Features.Environment
 {
     public interface IGridService
     {
-        UniTask CreateGrid(LevelConfiguration level, IPlayfieldView playfieldView, CancellationToken cancellationToken);
+        UniTask<List<PlayfieldButton>> CreateGrid(LevelConfiguration level, Transform container, CancellationToken cancellationToken);
     }
 }
 

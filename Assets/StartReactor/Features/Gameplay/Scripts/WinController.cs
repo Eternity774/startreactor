@@ -20,12 +20,9 @@ namespace StartReactor.Features.Gameplay
 
         protected override async UniTask OnFlowAsync(CancellationToken cancellationToken)
         {
-            if (_gameModel.CurrentLevelIndex + 1 < _gameModel.AllLevels.Count)
-            {
-                _gameModel.SetLevel(_gameModel.CurrentLevelIndex + 1);
-            }
-
             await ExecuteAndWaitResultAsync<WinPopupController>(cancellationToken);
+
+            _gameModel.CompleteLevel();
 
             Complete();
         }

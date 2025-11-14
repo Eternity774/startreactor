@@ -10,45 +10,42 @@ namespace StartReactor.Features.UI
     {
         private readonly GameModel _gameModel;
         private readonly GameUIView _uiView;
+        private readonly ILevelsProvider _levelsProvider;
 
         public GameUIController(
             IControllerFactory controllerFactory,
             GameModel gameModel,
-            GameUIView uiView)
+            GameUIView uiView,
+            ILevelsProvider levelsProvider)
             : base(controllerFactory)
         {
             _gameModel = gameModel;
             _uiView = uiView;
+            _levelsProvider = levelsProvider;
         }
 
-        protected override void OnStart()
-        {
-            _gameModel.SequenceGenerated += OnSequenceGenerated;
-            _gameModel.LevelCompleted += OnLevelCompleted;
+	protected override void OnStart()
+	{
+		_gameModel.LevelCompleted += OnLevelCompleted;
+		_gameModel.SequenceIndexChanged += UpdateUI;
+		UpdateUI();
+	}
 
-            UpdateUI();
-        }
-
-        protected override void OnStop()
-        {
-            _gameModel.SequenceGenerated -= OnSequenceGenerated;
-            _gameModel.LevelCompleted -= OnLevelCompleted;
-        }
-
-        private void OnSequenceGenerated(System.Collections.Generic.List<int> sequence)
-        {
-            UpdateUI();
-        }
+	protected override void OnStop()
+	{
+		_gameModel.LevelCompleted -= OnLevelCompleted;
+		_gameModel.SequenceIndexChanged -= UpdateUI;
+	}
 
         private void OnLevelCompleted()
         {
-            int totalSequences = _gameModel.CurrentLevel.Sequences.Count;
+            int totalSequences = _levelsProvider.CurrentLevel.Sequences.Count;
             _uiView.SetSequenceText($"{totalSequences}/{totalSequences}");
         }
 
         private void UpdateUI()
         {
-            int totalSequences = _gameModel.CurrentLevel.Sequences.Count;
+            int totalSequences = _levelsProvider.CurrentLevel.Sequences.Count;
             int currentSequenceIndex = _gameModel.CurrentSequenceIndex;
             int currentSequenceNumber = currentSequenceIndex + 1;
             _uiView.SetSequenceText($"{currentSequenceNumber}/{totalSequences}");
