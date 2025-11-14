@@ -1,15 +1,14 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using UnityEngine;
-using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace StartReactor.Features.Core
 {
 	public class LevelsProvider : ILevelsProvider
 	{
+		private readonly ResourcesProvider _resourcesProvider;
 		private LevelConfiguration _currentLevel;
 		private List<LevelConfiguration> _levels;
 		private bool _isInitialized;
@@ -18,7 +17,12 @@ namespace StartReactor.Features.Core
 		public List<LevelConfiguration> AllLevels => _levels;
 		public int CurrentLevelIndex { get; private set; }
 
-		public async UniTask InitializeAsync(CancellationToken cancellationToken)
+		public LevelsProvider(ResourcesProvider resourcesProvider)
+		{
+			_resourcesProvider = resourcesProvider;
+		}
+
+		public async UniTask Initialize(CancellationToken cancellationToken)
 		{
 			if (!_isInitialized)
 			{
@@ -28,7 +32,7 @@ namespace StartReactor.Features.Core
 
 				if (_levels.Count == 0)
 				{
-					throw new System.Exception("No levels found. At least one level must be configured.");
+					throw new Exception("No levels found. At least one level must be configured.");
 				}
 
 				_isInitialized = true;
@@ -53,41 +57,9 @@ namespace StartReactor.Features.Core
 
 		private async UniTask<List<LevelConfiguration>> LoadAllLevelsAsync(CancellationToken cancellationToken)
 		{
-			var handle =
-				Addressables.LoadAssetAsync<LevelsConfig>(AddressableKeys.LevelsConfig);
+			var levelsConfig = await _resourcesProvider.LoadAsync<LevelsConfig>(AddressableKeys.LevelsConfig, cancellationToken);
 
-			try
-			{
-				await handle.ToUniTask(cancellationToken: cancellationToken);
-
-				if (handle.Status == AsyncOperationStatus.Succeeded && handle.Result != null)
-				{
-					var levelsConfig = handle.Result;
-
-					var levels = levelsConfig.Levels
-						.Where(level => level != null)
-						.ToList();
-
-					return levels;
-				}
-				else
-				{
-					Debug.LogError($"Failed to load LevelsConfig. Status: {handle.Status}");
-					Addressables.Release(handle);
-					return new List<LevelConfiguration>();
-				}
-			}
-			catch (System.OperationCanceledException)
-			{
-				Addressables.Release(handle);
-				throw;
-			}
-			catch (System.Exception ex)
-			{
-				Debug.LogError($"Error loading LevelsConfig: {ex.Message}");
-				Addressables.Release(handle);
-				return new List<LevelConfiguration>();
-			}
+			return levelsConfig.Levels;
 		}
 	}
 }

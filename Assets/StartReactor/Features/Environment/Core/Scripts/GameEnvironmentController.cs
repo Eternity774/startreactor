@@ -1,7 +1,7 @@
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Playtika.Controllers;
-using StartReactor.Features.Gameplay;
+using StartReactor.Features.Game;
 
 namespace StartReactor.Features.Environment
 {
@@ -13,7 +13,7 @@ namespace StartReactor.Features.Environment
 
 		protected override async UniTask OnFlowAsync(CancellationToken cancellationToken)
 		{
-			await ExecuteAndWaitResultAsync<SequenceController>(cancellationToken);
+			await ExecuteAndWaitResultAsync<GameStateController>(cancellationToken);
 
 			Complete();
 		}

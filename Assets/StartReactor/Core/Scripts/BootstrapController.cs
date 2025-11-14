@@ -4,27 +4,26 @@ using StartReactor.Features.Core;
 
 namespace StartReactor.Core
 {
-    public class BootstrapController : RootController
-    {
-        public BootstrapController(IControllerFactory controllerFactory)
-            : base(controllerFactory)
-        {
-        }
+	public class BootstrapController : RootController
+	{
+		public BootstrapController(IControllerFactory controllerFactory)
+			: base(controllerFactory)
+		{
+		}
 
-        protected override void OnStart()
-        {
-            FlowAsync().Forget();
+		protected override void OnStart()
+		{
+			FlowAsync().Forget();
 
-            base.OnStart();
-        }
+			base.OnStart();
+		}
 
-        private async UniTask FlowAsync()
-        {
-            while (!CancellationToken.IsCancellationRequested)
-            {
-                await ExecuteAndWaitResultAsync<GameLoopController>(CancellationToken);
-            }
-        }
-    }
+		private async UniTask FlowAsync()
+		{
+			while (!CancellationToken.IsCancellationRequested)
+			{
+				await ExecuteAndWaitResultAsync<GameLoopController>(CancellationToken);
+			}
+		}
+	}
 }
-

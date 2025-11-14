@@ -1,74 +1,55 @@
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using StartReactor.Features.Game;
 
 namespace StartReactor.Features.Core
 {
 	public class GameModel
 	{
 		public event Action LevelCompleted;
-		public event Action SequenceShouldStart;
+		public event Action SequenceStartRequested;
 		public event Action SequenceIndexChanged;
 
-		private int _currentInputIndex;
-
-		public int CurrentSequenceIndex { get; set; }
-		public List<int> CurrentSequence { get; private set; }
-		public int CurrentInputIndex => _currentInputIndex;
+		public SequenceState SequenceState { get; }
 
 		private readonly ILevelsProvider _levelsProvider;
+
+		public int CurrentSequenceIndex => SequenceState.CurrentSequenceIndex;
 
 		public GameModel(ILevelsProvider levelsProvider)
 		{
 			_levelsProvider = levelsProvider;
-			CurrentSequence = new List<int>();
+			SequenceState = new SequenceState();
 		}
 
-		public async UniTask InitializeAsync(CancellationToken cancellationToken)
+		public async UniTask Initialize(CancellationToken cancellationToken)
 		{
-			await _levelsProvider.InitializeAsync(cancellationToken);
+			await _levelsProvider.Initialize(cancellationToken);
 			ResetGame();
 		}
 
 		public void ResetGame()
 		{
-			CurrentSequenceIndex = 0;
-			CurrentSequence.Clear();
-			_currentInputIndex = 0;
+			SequenceState.Reset();
 			SequenceIndexChanged?.Invoke();
-			SequenceShouldStart?.Invoke();
+			SequenceStartRequested?.Invoke();
 		}
 
-		public void StartInputPhase()
+		public void CompleteSequence()
 		{
-			_currentInputIndex = 0;
-		}
-
-		public void AdvanceInputIndex()
-		{
-			_currentInputIndex++;
-		}
-
-		public void ResetCurrentSequence()
-		{
-			_currentInputIndex = 0;
-		}
-
-	public void CompleteSequence()
-	{
-		CurrentSequenceIndex++;
-		if (CurrentSequenceIndex < _levelsProvider.CurrentLevel.Sequences.Count)
-		{
+			SequenceState.CurrentSequenceIndex++;
 			SequenceIndexChanged?.Invoke();
-			SequenceShouldStart?.Invoke();
+
+			if (SequenceState.CurrentSequenceIndex < _levelsProvider.CurrentLevel.Sequences.Count)
+			{
+				SequenceStartRequested?.Invoke();
+			}
+			else
+			{
+				LevelCompleted?.Invoke();
+			}
 		}
-		else
-		{
-			SequenceIndexChanged?.Invoke();
-			LevelCompleted?.Invoke();
-		}
-	}
 
 		public void CompleteLevel()
 		{

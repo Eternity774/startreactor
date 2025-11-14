@@ -6,26 +6,25 @@ using StartReactor.Features.UI;
 
 namespace StartReactor.Features.Gameplay
 {
-    public class WinController : ControllerWithResultBase
-    {
-        private readonly GameModel _gameModel;
+	public class WinController : ControllerWithResultBase
+	{
+		private readonly GameModel _gameModel;
 
-        public WinController(
-            IControllerFactory controllerFactory,
-            GameModel gameModel)
-            : base(controllerFactory)
-        {
-            _gameModel = gameModel;
-        }
+		public WinController(
+			IControllerFactory controllerFactory,
+			GameModel gameModel)
+			: base(controllerFactory)
+		{
+			_gameModel = gameModel;
+		}
 
-        protected override async UniTask OnFlowAsync(CancellationToken cancellationToken)
-        {
-            await ExecuteAndWaitResultAsync<WinPopupController>(cancellationToken);
+		protected override async UniTask OnFlowAsync(CancellationToken cancellationToken)
+		{
+			await ExecuteAndWaitResultAsync<WinPopupController>(cancellationToken);
 
-            _gameModel.CompleteLevel();
+			_gameModel.CompleteLevel();
 
-            Complete();
-        }
-    }
+			Complete();
+		}
+	}
 }
-

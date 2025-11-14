@@ -6,34 +6,24 @@ using UnityEngine;
 
 namespace StartReactor.Features.UI
 {
-    public class PopupFactory : IPopupFactory
-    {
-        private readonly ResourcesProvider _resourcesProvider;
+	public class PopupFactory : IPopupFactory
+	{
+		private readonly ResourcesProvider _resourcesProvider;
 
-        public PopupFactory(ResourcesProvider resourcesProvider)
-        {
-            _resourcesProvider = resourcesProvider;
-        }
+		public PopupFactory(ResourcesProvider resourcesProvider)
+		{
+			_resourcesProvider = resourcesProvider;
+		}
 
-        public async UniTask<T> CreatePopupAsync<T>(string addressableKey, Transform container, CancellationToken cancellationToken) where T : class
-        {
-            GameObject popupPrefab = await _resourcesProvider.LoadAsync<GameObject>(
-                addressableKey,
-                cancellationToken);
+		public async UniTask<T> CreatePopupAsync<T>(string addressableKey, Transform container, CancellationToken cancellationToken) where T : class
+		{
+			var popupPrefab = await _resourcesProvider.LoadAsync<GameObject>(addressableKey, cancellationToken);
 
-            GameObject popupInstance = Object.Instantiate(popupPrefab, container);
-            
-            T popup = popupInstance.GetComponent<T>();
+			var popupInstance = Object.Instantiate(popupPrefab, container);
 
-            return popup;
-        }
+			var popup = popupInstance.GetComponent<T>();
 
-        public void ReleasePopup<T>(T popup) where T : class, IPopupView
-        {
-            if (popup is MonoBehaviour monoBehaviour)
-            {
-                Object.Destroy(monoBehaviour.gameObject);
-            }
-        }
-    }
+			return popup;
+		}
+	}
 }

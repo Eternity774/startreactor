@@ -10,9 +10,7 @@ namespace StartReactor.Features.Core
 		List<LevelConfiguration> AllLevels { get; }
 		int CurrentLevelIndex { get; }
 
-		UniTask InitializeAsync(CancellationToken cancellationToken);
+		UniTask Initialize(CancellationToken cancellationToken);
 		void SetLevel(int levelIndex);
 	}
 }
-
-

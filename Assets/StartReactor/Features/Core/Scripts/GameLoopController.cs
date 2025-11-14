@@ -6,26 +6,25 @@ using StartReactor.Features.UI;
 
 namespace StartReactor.Features.Core
 {
-    public class GameLoopController : ControllerWithResultBase
-    {
-        private readonly GameModel _gameModel;
+	public class GameLoopController : ControllerWithResultBase
+	{
+		private readonly GameModel _gameModel;
 
-        public GameLoopController(
-            IControllerFactory controllerFactory,
-            GameModel gameModel)
-            : base(controllerFactory)
-        {
-            _gameModel = gameModel;
-        }
+		public GameLoopController(
+			IControllerFactory controllerFactory,
+			GameModel gameModel)
+			: base(controllerFactory)
+		{
+			_gameModel = gameModel;
+		}
 
-        protected override async UniTask OnFlowAsync(CancellationToken cancellationToken)
-        {
-            await _gameModel.InitializeAsync(cancellationToken);
-            cancellationToken.ThrowIfCancellationRequested();
+		protected override async UniTask OnFlowAsync(CancellationToken cancellationToken)
+		{
+			await _gameModel.Initialize(cancellationToken);
+			cancellationToken.ThrowIfCancellationRequested();
 
-            Execute<GameUIController>();
-            await ExecuteAndWaitResultAsync<GameEnvironmentController>(cancellationToken);
-        }
-    }
+			Execute<GameUIController>();
+			await ExecuteAndWaitResultAsync<GameEnvironmentController>(cancellationToken);
+		}
+	}
 }
-
