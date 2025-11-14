@@ -8,8 +8,8 @@ namespace StartReactor.Features.Core
 	public class GameModel
 	{
 		public event Action LevelCompleted;
-		public event Action SequenceStartRequested;
 		public event Action SequenceIndexChanged;
+		public event Action SequenceStartRequested;
 
 		public SequenceState SequenceState { get; }
 
@@ -36,16 +36,17 @@ namespace StartReactor.Features.Core
 			SequenceStartRequested?.Invoke();
 		}
 
+		public void RequestNextSequence()
+		{
+			SequenceStartRequested?.Invoke();
+		}
+
 		public void CompleteSequence()
 		{
 			SequenceState.CurrentSequenceIndex++;
 			SequenceIndexChanged?.Invoke();
 
-			if (SequenceState.CurrentSequenceIndex < _levelsProvider.CurrentLevel.Sequences.Count)
-			{
-				SequenceStartRequested?.Invoke();
-			}
-			else
+			if (SequenceState.CurrentSequenceIndex >= _levelsProvider.CurrentLevel.Sequences.Count)
 			{
 				LevelCompleted?.Invoke();
 			}

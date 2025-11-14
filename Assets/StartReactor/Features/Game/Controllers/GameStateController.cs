@@ -22,7 +22,6 @@ namespace StartReactor.Features.Game
 		private readonly InputPhaseController _inputPhase;
 
 		private GameConfiguration _gameConfiguration;
-		private bool _isPlayingRound;
 		private int _currentLevelIndex;
 
 		public GameStateController(
@@ -77,33 +76,28 @@ namespace StartReactor.Features.Game
 
 		private void OnSequenceStartRequested()
 		{
-			if (_isPlayingRound)
-			{
-				return;
-			}
-
-			OnSequenceStartRequestedAsync().Forget();
+			PlayRoundAsync().Forget();
 		}
 
-		private async UniTask OnSequenceStartRequestedAsync()
+	private async UniTask PlayRoundAsync()
+	{
+		if (_levelsProvider.CurrentLevelIndex != _currentLevelIndex)
 		{
-			_isPlayingRound = true;
-
-			try
-			{
-				if (_levelsProvider.CurrentLevelIndex != _currentLevelIndex)
-				{
-					_currentLevelIndex = _levelsProvider.CurrentLevelIndex;
-					await CreateGrid(CancellationToken);
-				}
-
-				await PlayRound(CancellationToken);
-			}
-			finally
-			{
-				_isPlayingRound = false;
-			}
+			_currentLevelIndex = _levelsProvider.CurrentLevelIndex;
+			await CreateGrid(CancellationToken);
 		}
+
+		var isLastSequence = _gameModel.SequenceState.CurrentSequenceIndex >= _levelsProvider.CurrentLevel.Sequences.Count - 1;
+
+		await PlayRound(CancellationToken);
+
+		if (isLastSequence)
+		{
+			return;
+		}
+
+		_gameModel.RequestNextSequence();
+	}
 
 		private async UniTask CreateGrid(CancellationToken cancellationToken)
 		{
@@ -122,48 +116,47 @@ namespace StartReactor.Features.Game
 				cancellationToken: cancellationToken);
 		}
 
-		private async UniTask PlayRound(CancellationToken cancellationToken)
+	private async UniTask PlayRound(CancellationToken cancellationToken)
+	{
+		GenerateNewSequence();
+
+		while (!cancellationToken.IsCancellationRequested)
 		{
-			GenerateNewSequence();
+			await _sequencePlayback.PlaySequence(_gameModel.SequenceState.CurrentSequence, cancellationToken);
 
-			while (!cancellationToken.IsCancellationRequested)
+			await UniTask.Delay(TimeSpan.FromSeconds(_gameConfiguration.ButtonDisplayDelay), cancellationToken: cancellationToken);
+
+			var inputResult = await _inputPhase.WaitForInput(cancellationToken);
+
+			if (inputResult == InputPhaseController.InputPhaseResult.Success)
 			{
-				await _sequencePlayback.PlaySequence(_gameModel.SequenceState.CurrentSequence, cancellationToken);
-
-				await UniTask.Delay(TimeSpan.FromSeconds(_gameConfiguration.ButtonDisplayDelay), cancellationToken: cancellationToken);
-
-				var inputResult = await _inputPhase.WaitForInput(cancellationToken);
-
-				if (inputResult == InputPhaseController.InputPhaseResult.Success)
-				{
-					await HandleSuccessResult(cancellationToken);
-				}
-				else
-				{
-					await HandleFailureResult(cancellationToken);
-				}
+				await HandleSuccessResult(cancellationToken);
+				return;
 			}
-		}
 
-		private async UniTask HandleSuccessResult(CancellationToken cancellationToken)
+			await HandleFailureResult(cancellationToken);
+		}
+	}
+
+	private async UniTask HandleSuccessResult(CancellationToken cancellationToken)
+	{
+		_gameModel.CompleteSequence();
+
+		await UniTask.Delay(TimeSpan.FromSeconds(_gameConfiguration.SequenceWinDelay), cancellationToken: cancellationToken);
+
+		_visualFeedback.SetAllButtonsDisabled();
+
+		var isLastSequence = _gameModel.SequenceState.CurrentSequenceIndex >= _levelsProvider.CurrentLevel.Sequences.Count;
+
+		if (isLastSequence)
 		{
-			_gameModel.CompleteSequence();
-
-			var isLastSequence = _gameModel.SequenceState.CurrentSequenceIndex >= _levelsProvider.CurrentLevel.Sequences.Count;
-
-			await UniTask.Delay(TimeSpan.FromSeconds(_gameConfiguration.SequenceWinDelay), cancellationToken: cancellationToken);
-
-			_visualFeedback.SetAllButtonsDisabled();
-
-			if (isLastSequence)
-			{
-				await ExecuteAndWaitResultAsync<WinController>(cancellationToken);
-			}
-			else
-			{
-				await UniTask.Delay(TimeSpan.FromSeconds(_gameConfiguration.SequenceCompletionDelay), cancellationToken: cancellationToken);
-			}
+			await ExecuteAndWaitResultAsync<WinController>(cancellationToken);
 		}
+		else
+		{
+			await UniTask.Delay(TimeSpan.FromSeconds(_gameConfiguration.SequenceCompletionDelay), cancellationToken: cancellationToken);
+		}
+	}
 
 		private async UniTask HandleFailureResult(CancellationToken cancellationToken)
 		{
